@@ -11,9 +11,9 @@ class BoxListTest extends \PHPUnit_Framework_TestCase
 {
     function testCompare()
     {
-        $box1 = new UndefinedBox('Small', 21, 21, 3, 1, 20, 20, 2, 100);
-        $box2 = new UndefinedBox('Large', 201, 201, 21, 1, 200, 200, 20, 1000);
-        $box3 = new UndefinedBox('Medium', 101, 101, 11, 5, 100, 100, 10, 500);
+        $box1 = new DefaultBox('Small', 21, 21, 3, 1, 20, 20, 2, 100);
+        $box2 = new DefaultBox('Large', 201, 201, 21, 1, 200, 200, 20, 1000);
+        $box3 = new DefaultBox('Medium', 101, 101, 11, 5, 100, 100, 10, 500);
 
         $list = new BoxList;
         $list->insert($box1);

@@ -7,7 +7,7 @@
 
 namespace DVDoug\BoxPacker;
 
-class UndefinedBox implements Box
+class DefaultBox implements Box
 {
 
     /**

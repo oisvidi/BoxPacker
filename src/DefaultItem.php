@@ -11,7 +11,7 @@ namespace DVDoug\BoxPacker;
  * Class TestItem
  * @package DVDoug\BoxPacker
  */
-class UndefinedItem implements Item
+class DefaultItem implements Item
 {
 
     /**
