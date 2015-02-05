@@ -4,14 +4,15 @@
  * @package BoxPacker
  * @author Doug Wright
  */
-  namespace DVDoug\BoxPacker;
+namespace DVDoug\BoxPacker;
 
-  /**
-   * A "box" (or envelope?) to pack items into
-   * @author Doug Wright
-   * @package BoxPacker
-   */
-  interface Box {
+/**
+ * A "box" (or envelope?) to pack items into
+ * @author Doug Wright
+ * @package BoxPacker
+ */
+interface Box
+{
 
     /**
      * Reference for box type (e.g. SKU or description)
@@ -73,4 +74,4 @@
      */
     public function getMaxWeight();
 
-  }
+}
