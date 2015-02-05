@@ -153,7 +153,6 @@ class Packer implements LoggerAwareInterface
                 $this->items->extract();
             }
             $packedBoxes->insert($bestBox);
-
         }
 
         return $packedBoxes;
@@ -256,37 +255,51 @@ class Packer implements LoggerAwareInterface
 
             $itemToPack = $aItems->top();
 
-            if ($itemToPack->getDepth() > $remainingDepth || $itemToPack->getWeight() > $remainingWeight) {
+            if (
+                $itemToPack->getDepth() > $remainingDepth
+                || $itemToPack->getWeight() > $remainingWeight
+            ) {
                 break;
             }
 
             $this->logger->log(LogLevel::DEBUG, "evaluating item {$itemToPack->getDescription()}");
-            $this->logger->log(LogLevel::DEBUG, "remaining width: {$remainingWidth}, length: {$remainingLength}, depth: {$remainingDepth}");
+            $this->logger->log(LogLevel::DEBUG, "remaining width: {$remainingWidth}, length: {$remainingLength}, depth: {$remainingDepth}, weight {$remainingWeight}");
             $this->logger->log(LogLevel::DEBUG, "layerWidth: {$layerWidth}, layerLength: {$layerLength}, layerDepth: {$layerDepth}");
 
             $itemWidth = $itemToPack->getWidth();
             $itemLength = $itemToPack->getLength();
+            $itemDepth = $itemToPack->getDepth();
 
             $fitsSameGap = min($remainingWidth - $itemWidth, $remainingLength - $itemLength);
             $fitsRotatedGap = min($remainingWidth - $itemLength, $remainingLength - $itemWidth);
+            $this->logger->log(LogLevel::DEBUG, "Fits", ["same gap" => $fitsSameGap, "rotated gap" => $fitsRotatedGap]);
 
             if ($fitsSameGap >= 0 || $fitsRotatedGap >= 0) {
 
                 $packedItems->insert($aItems->extract());
                 $remainingWeight -= $itemToPack->getWeight();
 
-                if ($fitsRotatedGap < 0 ||
-                    ($fitsSameGap >= 0 && $fitsSameGap <= $fitsRotatedGap) ||
-                    (!$aItems->isEmpty() && $aItems->top() == $itemToPack && $remainingLength >= 2 * $itemLength)
+                if (
+                    $fitsRotatedGap < 0
+                    || (
+                        $fitsSameGap >= 0
+                        && $fitsSameGap <= $fitsRotatedGap
+                    ) || (
+                        !$aItems->isEmpty()
+                        && $aItems->top() == $itemToPack
+                        && $remainingLength >= 2 * $itemLength
+                    )
                 ) {
                     $this->logger->log(LogLevel::DEBUG, "fits (better) unrotated");
                     $remainingLength -= $itemLength;
                     $layerLength += $itemLength;
+                    $remainingWidth -= $itemWidth;
                     $layerWidth = max($itemWidth, $layerWidth);
                 } else {
                     $this->logger->log(LogLevel::DEBUG, "fits (better) rotated");
                     $remainingLength -= $itemWidth;
                     $layerLength += $itemWidth;
+                    $remainingWidth -= $itemLength;
                     $layerWidth = max($itemLength, $layerWidth);
                 }
                 $layerDepth = max($layerDepth, $itemToPack->getDepth()); //greater than 0, items will always be less deep
@@ -307,8 +320,14 @@ class Packer implements LoggerAwareInterface
                         break;
                     }
                 }
+                $remainingDepth -= $itemDepth;
             } else {
-                if ($remainingWidth >= min($itemWidth, $itemLength) && $layerDepth > 0 && $layerWidth > 0 && $layerLength > 0) {
+                if (
+                    $remainingWidth >= min($itemWidth, $itemLength)
+                    && $layerDepth > 0
+                    && $layerWidth > 0
+                    && $layerLength > 0
+                ) {
                     $this->logger->log(LogLevel::DEBUG, "No more fit in lengthwise, resetting for new row");
                     $remainingLength += $layerLength;
                     $remainingWidth -= $layerWidth;
@@ -321,8 +340,12 @@ class Packer implements LoggerAwareInterface
                     break;
                 }
 
-                $remainingWidth = $layerWidth ? min(floor($layerWidth * 1.1), $aBox->getInnerWidth()) : $aBox->getInnerWidth();
-                $remainingLength = $layerLength ? min(floor($layerLength * 1.1), $aBox->getInnerLength()) : $aBox->getInnerLength();
+                $remainingWidth = $layerWidth
+                    ? min(floor($layerWidth * 1.1), $aBox->getInnerWidth())
+                    : $aBox->getInnerWidth();
+                $remainingLength = $layerLength
+                    ? min(floor($layerLength * 1.1), $aBox->getInnerLength())
+                    : $aBox->getInnerLength();
                 $remainingDepth -= $layerDepth;
 
                 $layerWidth = $layerLength = $layerDepth = 0;
